@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#050608">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>Esfera de Aplicativos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#050608;color:#fff;font-family:Arial,sans-serif}
+.app{position:relative;width:100%;height:100%;overflow:hidden;background:radial-gradient(circle at 50% 45%,#202633 0,transparent 30%),radial-gradient(circle at 50% 55%,#11151d,#030405 70%)}
+.header{position:absolute;top:0;left:0;width:100%;padding:max(28px,env(safe-area-inset-top)) 18px 12px;display:flex;justify-content:space-between;align-items:center;z-index:20}
+.title{font-size:21px;font-weight:700}.subtitle{font-size:12px;color:#9297a2;margin-top:4px}
+.menu{width:45px;height:45px;border-radius:50%;border:1px solid #ffffff1c;background:#ffffff0d;color:white;font-size:24px}
+.scene{position:absolute;left:50%;top:52%;width:min(86vw,430px);height:min(86vw,430px);transform:translate(-50%,-50%);perspective:1100px;touch-action:none;user-select:none}
+.sphere{position:absolute;inset:0;transform-style:preserve-3d}
+.icon{position:absolute;left:50%;top:50%;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:27px;color:white;border:1px solid #ffffff38;box-shadow:0 12px 28px #0009,inset 0 1px 2px #fff5;transform-style:preserve-3d;cursor:pointer;will-change:transform,opacity}
+.icon img{width:100%;height:100%;object-fit:cover;border-radius:inherit;pointer-events:none}.icon:after{content:"";position:absolute;left:8px;right:8px;top:5px;height:14px;border-radius:50%;background:linear-gradient(#fff5,transparent);pointer-events:none}
+.name{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:bold;white-space:nowrap;text-shadow:0 2px 7px #000}
+.blue{background:linear-gradient(145deg,#5cbcff,#2165d2)}.green{background:linear-gradient(145deg,#65ee8a,#138f46)}.purple{background:linear-gradient(145deg,#bd55ff,#5520bd)}.red{background:linear-gradient(145deg,#ff6676,#c71938)}.orange{background:linear-gradient(145deg,#ffc35a,#d66b10)}.cyan{background:linear-gradient(145deg,#64f2ee,#168aa1)}.yellow{background:linear-gradient(145deg,#ffea72,#d49a17)}.pink{background:linear-gradient(145deg,#ff6bb5,#c62176)}
+.hint{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));left:7%;right:7%;padding:12px;border-radius:25px;background:#ffffff09;border:1px solid #ffffff12;color:#858a95;text-align:center;font-size:12px;z-index:20}
+.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;background:#000b;backdrop-filter:blur(8px)}.overlay.show{display:flex}
+.panel{width:100%;max-width:550px;max-height:92vh;overflow:auto;margin:auto auto 0;padding:20px 18px max(28px,env(safe-area-inset-bottom));border-radius:25px 25px 0 0;background:#15181f;border-top:1px solid #ffffff20;box-shadow:0 -20px 60px #0009}
+.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.panel h2{font-size:19px}.close{width:38px;height:38px;border:0;border-radius:50%;background:#ffffff0d;color:#fff;font-size:21px}
+.section{padding:14px;margin-bottom:10px;border-radius:15px;background:#ffffff06;border:1px solid #ffffff0b}.section h3{font-size:12px;color:#aaa;margin-bottom:10px}
+input,select{width:100%;height:43px;margin-bottom:9px;padding:0 12px;border-radius:10px;border:1px solid #ffffff14;background:#080a0e;color:#fff;outline:none}
+button{cursor:pointer}.primary,.secondary,.danger{width:100%;min-height:43px;border:0;border-radius:11px;color:#fff;font-weight:bold}.primary{background:linear-gradient(135deg,#337fe9,#5b3ee1)}.secondary{margin-top:7px;background:#ffffff0b}.danger{background:#ff3c4b18;color:#ff7985;margin-top:7px}
+.success{display:none}.list{display:flex;flex-direction:column;gap:7px}.row{display:flex;align-items:center;gap:9px;padding:7px;border-radius:12px;background:#ffffff07}.preview{width:43px;height:43px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;overflow:hidden;flex:none}.preview img{width:100%;height:100%;object-fit:cover}.details{flex:1;min-width:0}.details b,.details small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.details b{font-size:12px}.details small{font-size:9px;color:#777;margin-top:3px}.row button{width:34px;height:34px;border:0;border-radius:9px;background:#ffffff0b;color:#fff}.row .del{color:#ff7180;background:#ff3c4b12}.empty{text-align:center;color:#777;padding:18px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:85px;z-index:200;transform:translate(-50%,20px);opacity:0;padding:11px 16px;border-radius:13px;background:#191c23f5;border:1px solid #ffffff18;font-size:12px;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+.open{animation:open .25s forwards}@keyframes open{to{filter:brightness(2);opacity:0}}
+@media(max-height:680px){.scene{top:50%;width:82vw;height:82vw}.icon{width:55px;height:55px;font-size:24px}}
+@media(min-width:700px){.scene{width:min(60vw,520px);height:min(60vw,520px)}.icon{width:70px;height:70px;font-size:30px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div><div class="title">Esfera de Aplicativos</div><div class="subtitle">Toque em um ícone para acessar</div></div>
+<button class="menu" id="menu">⋮</button>
+</header>
+<main class="scene" id="scene"><div class="sphere" id="sphere"></div></main>
+<div class="hint">Arraste a esfera com o dedo</div>
+</div>
+
+<div class="overlay" id="overlay">
+<div class="panel">
+<div class="panelhead"><h2>Gerenciar aplicativos</h2><button class="close" id="close">×</button></div>
+
+<section class="section">
+<h3 id="formTitle">ADICIONAR APLICATIVO</h3>
+<input id="nome" placeholder="Nome do aplicativo">
+<input id="arquivo" placeholder="Arquivo HTML, ex.: gabarita.html">
+<input id="simbolo" maxlength="4" placeholder="Emoji, ex.: 🧠">
+<input id="icone" placeholder="Ícone, ex.: icones/gabarita.png">
+<select id="classe">
+<option value="blue">Azul</option><option value="green">Verde</option><option value="purple">Roxo</option>
+<option value="red">Vermelho</option><option value="orange">Laranja</option><option value="cyan">Ciano</option>
+<option value="yellow">Amarelo</option><option value="pink">Rosa</option>
+</select>
+<button class="primary" id="save">＋ Adicionar aplicativo</button>
+<button class="secondary" id="cancel" style="display:none">Cancelar edição</button>
+</section>
+
+<section class="section">
+<h3>CONFIGURAÇÃO</h3>
+<button class="secondary success" id="install">🏠 Instalar na tela inicial</button>
+<button class="secondary" id="export">📤 Exportar aplicativos</button>
+<button class="secondary" id="import">📥 Importar aplicativos</button>
+<input type="file" id="file" accept=".json" style="display:none">
+</section>
+
+<section class="section"><h3>MEUS APLICATIVOS</h3><div class="list" id="list"></div></section>
+<section class="section"><button class="danger" id="reset">↺ Restaurar aplicativos padrão</button></section>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const defaults=[
+{id:"atividade",nome:"Atividade Escolar",arquivo:"atividade.html",simbolo:"📚",icone:"",classe:"blue"},
+{id:"prova",nome:"PROVA AI",arquivo:"prova.html",simbolo:"📝",icone:"",classe:"purple"},
+{id:"gabarita",nome:"Gabarita AI",arquivo:"gabarita.html",simbolo:"🧠",icone:"",classe:"green"},
+{id:"matematica",nome:"Matemática",arquivo:"matematica.html",simbolo:"∑",icone:"",classe:"cyan"},
+{id:"quiz",nome:"Quiz",arquivo:"quiz.html",simbolo:"🎯",icone:"",classe:"red"},
+{id:"damas",nome:"Damas",arquivo:"damas.html",simbolo:"♟",icone:"",classe:"purple"},
+{id:"ludo",nome:"Ludo",arquivo:"ludo.html",simbolo:"🎲",icone:"",classe:"yellow"},
+{id:"uno",nome:"UNO",arquivo:"uno.html",simbolo:"🃏",icone:"",classe:"pink"}
+];
+const KEY="ESFERA_APPS_V3";
+let apps=JSON.parse(localStorage.getItem(KEY)||"null")||structuredClone(defaults);
+let items=[],rx=-8,ry=0,down=false,drag=false,sx=0,sy=0,ix=0,iy=0,editing=null,installEvent=null;
+const $=id=>document.getElementById(id);
+const sphere=$("sphere"),scene=$("scene");
+
+function saveData(){localStorage.setItem(KEY,JSON.stringify(apps))}
+function toast(t){const x=$("toast");x.textContent=t;x.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove("show"),2200)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function build(){
+sphere.innerHTML="";items=[];
+const n=apps.length;
+apps.forEach((a,i)=>{
+let y=n===1?0:1-(i/(n-1))*2;
+let r=Math.sqrt(Math.max(0,1-y*y)),ang=Math.PI*(3-Math.sqrt(5))*i;
+let p={x:Math.cos(ang)*r,y,z:Math.sin(ang)*r};
+let el=document.createElement("div");el.className="icon "+(a.classe||"blue");
+if(a.icone){let img=document.createElement("img");img.src=a.icone;img.alt=a.nome;el.appendChild(img)}else el.append(a.simbolo||"📱");
+let nm=document.createElement("span");nm.className="name";nm.textContent=a.nome;el.appendChild(nm);
+sphere.appendChild(el);items.push({el,p,a});
+el.onclick=()=>{if(!drag)openApp(el,a);drag=false};
+});
+render();
+}
+
+function render(){
+const R=scene.clientWidth*.36,ax=rx*Math.PI/180,ay=ry*Math.PI/180;
+items.forEach(o=>{
+let p=o.p,x1=p.x,y1=p.y*Math.cos(ax)-p.z*Math.sin(ax),z1=p.y*Math.sin(ax)+p.z*Math.cos(ax);
+let x=x1*Math.cos(ay)+z1*Math.sin(ay),z=-x1*Math.sin(ay)+z1*Math.cos(ay);
+x*=R;let y=y1*R;z*=R;
+let sc=Math.max(.55,Math.min(1.28,1+z/(R*2.7)));
+o.el.style.transform=`translate3d(calc(-50% + ${x}px),calc(-50% + ${y}px),${z}px) scale(${sc})`;
+o.el.style.opacity=.4+((z+R)/(2*R))*.6;
+o.el.style.zIndex=1000+Math.round(z);
+o.el.style.filter=z<-40?"brightness(.55)":"brightness(1)";
+});
+}
+function loop(){if(!down){ry+=.07;render()}requestAnimationFrame(loop)}loop();
+
+scene.onpointerdown=e=>{down=true;drag=false;sx=e.clientX;sy=e.clientY;ix=rx;iy=ry;scene.setPointerCapture(e.pointerId)}
+scene.onpointermove=e=>{if(!down)return;let dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>5||Math.abs(dy)>5)drag=true;ry=iy+dx*.45;rx=Math.max(-70,Math.min(70,ix+dy*.45));render()}
+function up(){down=false;setTimeout(()=>drag=false,80)}
+scene.onpointerup=up;scene.onpointercancel=up;addEventListener("resize",render);
+
+function openApp(el,a){if(!a.arquivo)return toast("Este aplicativo não possui arquivo HTML.");el.classList.add("open");setTimeout(()=>location.href=a.arquivo,220)}
+
+$("menu").onclick=()=>{$("overlay").classList.add("show");renderList()}
+$("close").onclick=()=>{$("overlay").classList.remove("show");cancelEdit()}
+$("overlay").onclick=e=>{if(e.target===$("overlay")){$("overlay").classList.remove("show");cancelEdit()}}
+
+$("save").onclick=()=>{
+let a={nome:$("nome").value.trim(),arquivo:$("arquivo").value.trim(),simbolo:$("simbolo").value.trim()||"📱",icone:$("icone").value.trim(),classe:$("classe").value};
+if(!a.nome||!a.arquivo)return toast("Preencha nome e arquivo HTML.");
+if(editing){let old=apps.find(x=>x.id===editing);Object.assign(old,a);toast("Aplicativo atualizado.")}else{a.id="app_"+Date.now();apps.push(a);toast("Aplicativo adicionado.")}
+saveData();build();renderList();clearForm();
+};
+$("cancel").onclick=cancelEdit;
+function clearForm(){$("nome").value="";$("arquivo").value="";$("simbolo").value="";$("icone").value="";$("classe").value="blue";editing=null;$("formTitle").textContent="ADICIONAR APLICATIVO";$("save").textContent="＋ Adicionar aplicativo";$("cancel").style.display="none"}
+function cancelEdit(){clearForm()}
+function edit(id){let a=apps.find(x=>x.id===id);if(!a)return;editing=id;$("nome").value=a.nome;$("arquivo").value=a.arquivo;$("simbolo").value=a.simbolo||"";$("icone").value=a.icone||"";$("classe").value=a.classe||"blue";$("formTitle").textContent="EDITAR APLICATIVO";$("save").textContent="✓ Salvar alterações";$("cancel").style.display="block";$("nome").focus()}
+function removeApp(id){let a=apps.find(x=>x.id===id);if(a&&confirm(`Remover "${a.nome}" da esfera?`)){apps=apps.filter(x=>x.id!==id);saveData();build();renderList();toast("Aplicativo removido.")}}
+
+function renderList(){
+let list=$("list");list.innerHTML="";
+if(!apps.length){list.innerHTML='<div class="empty">Nenhum aplicativo cadastrado.</div>';return}
+apps.forEach(a=>{
+let row=document.createElement("div");row.className="row";
+let pv=document.createElement("div");pv.className="preview "+(a.classe||"blue");
+if(a.icone){let img=document.createElement("img");img.src=a.icone;pv.appendChild(img)}else pv.textContent=a.simbolo||"📱";
+let d=document.createElement("div");d.className="details";d.innerHTML=`<b>${esc(a.nome)}</b><small>${esc(a.arquivo)}</small>`;
+let e=document.createElement("button");e.textContent="✏️";e.onclick=()=>edit(a.id);
+let del=document.createElement("button");del.textContent="🗑";del.className="del";del.onclick=()=>removeApp(a.id);
+row.append(pv,d,e,del);list.appendChild(row);
+});
+}
+
+$("reset").onclick=()=>{if(confirm("Restaurar os aplicativos padrão? Os adicionados por você serão removidos.")){apps=structuredClone(defaults);saveData();build();renderList();toast("Padrões restaurados.")}}
+$("export").onclick=()=>{let b=new Blob([JSON.stringify(apps,null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="minha-esfera-backup.json";a.click();URL.revokeObjectURL(u);toast("Backup exportado.")}
+$("import").onclick=()=>$("file").click();
+$("file").onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;apps=d;saveData();build();renderList();toast("Backup importado.")}catch{toast("Backup inválido.")}e.target.value=""};r.readAsText(f)}
+
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvent=e;$("install").style.display="block"});
+$("install").onclick=async()=>{if(!installEvent)return toast("Use o menu do navegador para adicionar à tela inicial.");installEvent.prompt();await installEvent.userChoice;installEvent=null;$("install").style.display="none"};
+
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.log));
+build();renderList();
+</script>
+</body>
+</html>

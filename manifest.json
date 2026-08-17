@@ -1,0 +1,15 @@
+{
+  "name":"Esfera de Aplicativos",
+  "short_name":"Esfera",
+  "description":"Launcher pessoal de aplicativos em esfera 3D",
+  "start_url":"./index.html",
+  "scope":"./",
+  "display":"standalone",
+  "orientation":"portrait",
+  "background_color":"#050608",
+  "theme_color":"#080a0f",
+  "icons":[
+    {"src":"icones/esfera-192.png","sizes":"192x192","type":"image/png"},
+    {"src":"icones/esfera-512.png","sizes":"512x512","type":"image/png"}
+  ]
+}
